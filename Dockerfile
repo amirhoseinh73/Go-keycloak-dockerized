@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY ./ .
 
+RUN go mod init keycloak-go
+
 RUN go get \
     github.com/gin-gonic/gin \
     github.com/golang-jwt/jwt/v4 \
@@ -15,6 +17,6 @@ RUN go get \
     gorm.io/gorm
 
 
-EXPOSE 5000
+EXPOSE 8002
 
 CMD [ "go", "run", "main.go" ]

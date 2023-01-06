@@ -1,8 +1,8 @@
 # Authentication using GO and Keycloak
 
-1. Run keycloak in docker container with DB postgres
+1. Run keycloak in docker container with DB postgres &check;
 
-2. Run Go in container
+2. Run Go in container &check;
 
 3. call keycloak apis using Go
 

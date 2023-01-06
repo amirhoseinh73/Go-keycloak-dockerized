@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  app:
+    container_name: go_keycloak_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8002:8002
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: blog_kk_app
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      DB_SCHEMA: public

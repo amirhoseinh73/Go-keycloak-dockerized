@@ -11,7 +11,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: keycloak
+      # POSTGRES_DB: keycloak
+      POSTGRES_DBPOSTGRES_MULTIPLE_DATABASES: keycloak,blog_kk_app
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
   keycloak:
