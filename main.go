@@ -1,7 +1,12 @@
 package main
 
-import "keycloak-go/app"
+import (
+	"fmt"
+	"keycloak_api_go/app"
+)
 
 func main() {
+	fmt.Println("Hello World!")
+
 	app.AppStart()
 }

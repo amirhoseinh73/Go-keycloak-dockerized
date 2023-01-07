@@ -1,4 +1,4 @@
-module keycloak-go
+module keycloak_api_go
 
 go 1.19
 
