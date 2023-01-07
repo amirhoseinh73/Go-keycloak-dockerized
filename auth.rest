@@ -1,0 +1,11 @@
+###
+POST http://localhost:8002/auth/register
+Content-Type: application/json
+
+{
+  "username": "marshall",
+  "password": "123456",
+  "email": "marshall@ericson.com",
+  "firstname" : "marshall",
+  "lastname" : "ericson"
+}

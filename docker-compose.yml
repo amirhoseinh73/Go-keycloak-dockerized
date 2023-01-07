@@ -24,3 +24,7 @@ services:
       - 8002:8002
     depends_on:
       - go_db
+networks: 
+  default: 
+    external: 
+      name: ABCNetworkGo
