@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
-	"keycloak_api_go/app/controller"
 	"keycloak_api_go/app/database"
+	"keycloak_api_go/app/route"
 	"log"
 	"os"
 
@@ -36,14 +36,8 @@ func loadDatabaseConnection() {
 func runAppServe() {
 	router := gin.Default()
 
-	publicRoutes := router.Group("/auth")
-	publicRoutes.POST("/register", controller.Register)
-	publicRoutes.POST("/login", controller.Login)
-
-	// protectedRoutes := router.Group("/api")
-	// protectedRoutes.Use(middleware.MiddlewareAuthKeycloak())
-	// protectedRoutes.POST("/entry", controller.AddEntry)
-	// protectedRoutes.GET("/entry", controller.GetAllEntries)
+	route.AuthRoutes(router)
+	route.BlogRoutes(router)
 
 	PORT := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
 

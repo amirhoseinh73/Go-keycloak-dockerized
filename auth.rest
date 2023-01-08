@@ -3,9 +3,9 @@ POST http://localhost:8002/auth/register
 Content-Type: application/json
 
 {
-  "username": "marshall",
+  "username": "marshall1",
   "password": "123456",
-  "email": "marshall@ericson.com",
+  "email": "marshall1@ericson.com",
   "firstname" : "marshall",
   "lastname" : "ericson"
 }

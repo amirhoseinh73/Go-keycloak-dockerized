@@ -12,15 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type adminLoginResponse struct {
-	Access_token       string `json:"access_token"`
-	Expires_in         int    `json:"expires_in"`
-	Refresh_expires_in int    `json:"refresh_expires_in"`
-	Token_type         string `json:"token_type"`
-	NotBeforePolicy    int    `json:"not-before-policy"`
-	Scope              string `json:"scope"`
-}
-
 func Register(context *gin.Context) {
 	var input model.AuthRegister
 
@@ -30,18 +21,11 @@ func Register(context *gin.Context) {
 	}
 
 	// get admin access token for register user
-	adminLoginResp := adminLogin()
-
-	var adminLoginJson adminLoginResponse
-	err := json.Unmarshal([]byte(adminLoginResp), &adminLoginJson)
-	if err != nil {
-		panic(err)
-	}
-
-	accessToken := adminLoginJson.Access_token
+	resp := adminLogin()
+	respJson := handleRespAdminLogin(resp)
 
 	// register user into keycloak
-	_ = registerIntoKeyclock(accessToken, input)
+	registerInKC(respJson.Access_token, input, context)
 
 	context.JSON(http.StatusCreated, gin.H{"message": "user created!"})
 }
@@ -80,15 +64,10 @@ func Login(context *gin.Context) {
 }
 
 func adminLogin() string {
-	KeycloakHost := os.Getenv("keycloak_host")
-	apiPath := os.Getenv("get_token_path")
-	contentType := "application/x-www-form-urlencoded"
+	apiUrl := getAdminLoginURL()
+	apiBody := getAdminLoginBody()
 
-	u, _ := url.ParseRequestURI(KeycloakHost)
-	u.Path = apiPath
-	apiUrl := u.String()
-
-	response, err := helper.CallRequest(apiUrl, getAdminLoginBody(), contentType, "")
+	response, err := helper.MakePostReqXWWWForm(apiUrl, apiBody)
 	if err != nil {
 		panic(err)
 	}
@@ -102,40 +81,74 @@ func adminLogin() string {
 	return string(responseBody)
 }
 
+func getAdminLoginURL() string {
+	KeycloakHost := os.Getenv("keycloak_host")
+	apiPath := os.Getenv("get_token_path")
+
+	u, _ := url.ParseRequestURI(KeycloakHost)
+	u.Path = apiPath
+	return u.String()
+}
+
 func getAdminLoginBody() string {
-	client_id := os.Getenv("client_id")
-	client_secret := os.Getenv("client_secret")
-	grant_type := os.Getenv("grant_type")
+	clientId := os.Getenv("client_id")
+	clientSecret := os.Getenv("client_secret")
+	grantType := os.Getenv("grant_type")
 
 	requestBody := url.Values{}
-	requestBody.Set("client_id", client_id)
-	requestBody.Set("client_secret", client_secret)
-	requestBody.Set("grant_type", grant_type)
+	requestBody.Set("client_id", clientId)
+	requestBody.Set("client_secret", clientSecret)
+	requestBody.Set("grant_type", grantType)
 
 	return requestBody.Encode()
 }
 
-func registerIntoKeyclock(accessToken string, input model.AuthRegister) error {
+func handleRespAdminLogin(resp string) helper.AdminLoginResponse {
+	var respJson helper.AdminLoginResponse
+	err := json.Unmarshal([]byte(resp), &respJson)
+	if err != nil {
+		panic(err)
+	}
+
+	return respJson
+}
+
+func registerInKC(accessToken string, input model.AuthRegister, context *gin.Context) error {
+	apiUrl := getRegisterURL()
+	apiBody := getRegisterBody(input)
+
+	response, err := helper.MakePostReqJsonAuth(apiUrl, apiBody, accessToken)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode == http.StatusCreated {
+		//success
+		return nil
+	}
+
+	// error message response from keycloak
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+
+	errRespJson := handleRespRegisterInKC(string(responseBody))
+	context.JSON(response.StatusCode, gin.H{"message": errRespJson.Message})
+	panic(errRespJson)
+}
+
+func getRegisterURL() string {
 	KeycloakHost := os.Getenv("keycloak_host")
 	apiPath := os.Getenv("register_user_path")
 
 	u, _ := url.ParseRequestURI(KeycloakHost)
 	u.Path = apiPath
-	apiUrl := u.String()
 
-	response, err := helper.CallRequest(apiUrl, getRegisterIntoKeycloakBody(input), "", accessToken)
-	if err != nil {
-		panic(err)
-	}
-
-	if response.StatusCode != http.StatusCreated {
-		panic(response)
-	}
-
-	return nil
+	return u.String()
 }
 
-func getRegisterIntoKeycloakBody(input model.AuthRegister) string {
+func getRegisterBody(input model.AuthRegister) string {
 	credential := map[string]any{
 		"type":      "password",
 		"value":     input.Password,
@@ -160,4 +173,13 @@ func getRegisterIntoKeycloakBody(input model.AuthRegister) string {
 	}
 
 	return string(bodyJson)
+}
+
+func handleRespRegisterInKC(resp string) helper.ErrorResponseKC {
+	var errRespJson helper.ErrorResponseKC
+	err := json.Unmarshal([]byte(resp), &errRespJson)
+	if err != nil {
+		panic(err)
+	}
+	return errRespJson
 }

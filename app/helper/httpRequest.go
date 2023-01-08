@@ -5,18 +5,32 @@ import (
 	"strings"
 )
 
-func CallRequest(apiUrl string, requestBody string, contentType string, authorization string) (*http.Response, error) {
-	if contentType == "" {
-		contentType = "application/json"
-	}
-
-	request, err := http.NewRequest(http.MethodPost, apiUrl, strings.NewReader(requestBody))
+func MakePostReqXWWWForm(url string, requestBody string) (*http.Response, error) {
+	request, err := http.NewRequest(http.MethodPost, string(url), strings.NewReader(requestBody))
 	if err != nil {
 		return &http.Response{}, err
 	}
-	request.Header.Add("Content-Type", contentType)
-	if authorization != "" {
-		request.Header.Add("Authorization", "Bearer "+authorization)
+
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return &http.Response{}, err
+	}
+
+	return response, err
+}
+
+func MakePostReqJsonAuth(url string, requestBody string, accessToken string) (*http.Response, error) {
+	request, err := http.NewRequest(http.MethodPost, string(url), strings.NewReader(requestBody))
+	if err != nil {
+		return &http.Response{}, err
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+	if accessToken != "" {
+		request.Header.Add("Authorization", "Bearer "+accessToken)
 	}
 
 	client := &http.Client{}
