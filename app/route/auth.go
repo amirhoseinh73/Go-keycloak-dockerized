@@ -2,14 +2,19 @@ package route
 
 import (
 	"keycloak_api_go/app/controller"
+	"keycloak_api_go/app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func AuthRoutes(router *gin.Engine) *gin.RouterGroup {
-	authRoutes := router.Group("/auth")
-	authRoutes.POST("/register", controller.Register)
-	authRoutes.POST("/login", controller.Login)
+	routes := router.Group("/auth")
+	routes.POST("/register", controller.Register)
+	routes.POST("/login", controller.Login)
 
-	return authRoutes
+	protectedRoutes := router.Group("/user")
+	protectedRoutes.Use(middleware.MiddlewareAuthKC())
+	protectedRoutes.GET("/info", controller.Info)
+
+	return routes
 }

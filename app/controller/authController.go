@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,71 +22,62 @@ func Register(context *gin.Context) {
 	}
 
 	// get admin access token for register user
-	resp := adminLogin()
-	respJson := handleRespAdminLogin(resp)
+	resp := userLogin(context, true, nil)
+	respJson := handleRespUserLogin(resp) // error handling itself
 
 	// register user into keycloak
-	registerInKC(respJson.Access_token, input, context)
+	registerInKC(respJson.Access_token, input, context) // error handling itself
 
 	context.JSON(http.StatusCreated, gin.H{"message": "user created!"})
 }
 
 func Login(context *gin.Context) {
-	// var input model.Authentication
+	var input model.AuthLogin
 
-	// if err := context.ShouldBindJSON(&input); err != nil {
-	// 	context.JSON(http.StatusBadRequest, gin.H{
-	// 		"error json": err.Error(),
-	// 		"data":       &input,
-	// 	})
-	// 	return
-	// }
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	// user, err := model.FindUserByUsername(input.Username)
+	// login user
+	resp := userLogin(context, false, &input)
+	respJson := handleRespUserLogin(resp) // error handling itself
+	respMap := structs.Map(&respJson)
 
-	// if err != nil {
-	// 	context.JSON(http.StatusBadRequest, gin.H{"error username": err.Error()})
-	// 	return
-	// }
-
-	// err = user.ValidatePassword(input.Password)
-	// if err != nil {
-	// 	context.JSON(http.StatusBadRequest, gin.H{"error password": err.Error()})
-	// 	return
-	// }
-
-	// jwt, err := helper.GenerateJWT(user)
-	// if err != nil {
-	// 	context.JSON(http.StatusBadRequest, gin.H{"error jwt": err.Error()})
-	// 	return
-	// }
-
-	context.JSON(http.StatusOK, gin.H{"jwt": "jwt"})
+	context.JSON(http.StatusOK, respMap)
 }
 
-func adminLogin() string {
-	apiUrl := getAdminLoginURL()
-	apiBody := getAdminLoginBody()
+func userLogin(context *gin.Context, isAdmin bool, loginInfo *model.AuthLogin) string {
+	apiUrl := getUserLoginURL()
+	var apiBody string
+	if isAdmin {
+		apiBody = getAdminLoginBody()
+	} else {
+		apiBody = getUserLoginBody(loginInfo)
+	}
 
 	response, err := helper.MakePostReqXWWWForm(apiUrl, apiBody)
 	if err != nil {
 		panic(err)
 	}
 
+	responseBody, _ := ioutil.ReadAll(response.Body)
+
 	if response.StatusCode != http.StatusOK {
+		errRespJson := handleRespRegisterInKC(string(responseBody))
+		context.JSON(response.StatusCode, gin.H{"message": errRespJson.Message})
+		context.Abort()
 		panic(response)
 	}
-
-	responseBody, _ := ioutil.ReadAll(response.Body)
 
 	return string(responseBody)
 }
 
-func getAdminLoginURL() string {
-	KeycloakHost := os.Getenv("keycloak_host")
-	apiPath := os.Getenv("get_token_path")
+func getUserLoginURL() string {
+	KCKHost := os.Getenv("keycloak_host")
+	apiPath := os.Getenv("user_login_path")
 
-	u, _ := url.ParseRequestURI(KeycloakHost)
+	u, _ := url.ParseRequestURI(KCKHost)
 	u.Path = apiPath
 	return u.String()
 }
@@ -93,7 +85,7 @@ func getAdminLoginURL() string {
 func getAdminLoginBody() string {
 	clientId := os.Getenv("client_id")
 	clientSecret := os.Getenv("client_secret")
-	grantType := os.Getenv("grant_type")
+	grantType := "client_credentials"
 
 	requestBody := url.Values{}
 	requestBody.Set("client_id", clientId)
@@ -103,7 +95,22 @@ func getAdminLoginBody() string {
 	return requestBody.Encode()
 }
 
-func handleRespAdminLogin(resp string) helper.AdminLoginResponse {
+func getUserLoginBody(loginInfo *model.AuthLogin) string {
+	clientId := os.Getenv("client_id")
+	clientSecret := os.Getenv("client_secret")
+	grantType := "password"
+
+	requestBody := url.Values{}
+	requestBody.Set("client_id", clientId)
+	requestBody.Set("client_secret", clientSecret)
+	requestBody.Set("grant_type", grantType)
+	requestBody.Set("username", loginInfo.Username)
+	requestBody.Set("password", loginInfo.Password)
+
+	return requestBody.Encode()
+}
+
+func handleRespUserLogin(resp string) helper.AdminLoginResponse {
 	var respJson helper.AdminLoginResponse
 	err := json.Unmarshal([]byte(resp), &respJson)
 	if err != nil {
@@ -135,14 +142,15 @@ func registerInKC(accessToken string, input model.AuthRegister, context *gin.Con
 
 	errRespJson := handleRespRegisterInKC(string(responseBody))
 	context.JSON(response.StatusCode, gin.H{"message": errRespJson.Message})
+	context.Abort()
 	panic(errRespJson)
 }
 
 func getRegisterURL() string {
-	KeycloakHost := os.Getenv("keycloak_host")
-	apiPath := os.Getenv("register_user_path")
+	KCKHost := os.Getenv("keycloak_host")
+	apiPath := os.Getenv("user_register_path")
 
-	u, _ := url.ParseRequestURI(KeycloakHost)
+	u, _ := url.ParseRequestURI(KCKHost)
 	u.Path = apiPath
 
 	return u.String()

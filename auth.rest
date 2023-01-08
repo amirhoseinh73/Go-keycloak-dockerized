@@ -3,9 +3,23 @@ POST http://localhost:8002/auth/register
 Content-Type: application/json
 
 {
-  "username": "marshall1",
+  "username": "marshall3",
   "password": "123456",
-  "email": "marshall1@ericson.com",
+  "email": "marshall3@ericson.com",
   "firstname" : "marshall",
   "lastname" : "ericson"
 }
+
+###
+POST http://localhost:8002/auth/login
+Content-Type: application/json
+
+{
+  "username": "marshall1",
+  "password": "123456"
+}
+
+###
+GET http://localhost:8002/user/info
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJaekoyTXBDSkxYZUktTG9feWdfUmV0YU41Q05Lc0d0dmZxc0lPQk1tM3ZNIn0.eyJleHAiOjE2NzMyMTE4MjEsImlhdCI6MTY3MzIxMTc2MSwianRpIjoiMDFmZTM5YmItMDEzMC00YmI5LWI1YWQtNjY5YTAxZTc3MTM0IiwiaXNzIjoiaHR0cDovL2tleWNsb2FrLWtleWNsb2FrLTE6ODA4MC9hdXRoL3JlYWxtcy9tYXN0ZXIiLCJzdWIiOiI3M2VkZjcxMS1mMzZmLTRmOTUtOWQyZS1hYjM3ZTY4MjcwNjQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhZG1pbi1jbGkiLCJzZXNzaW9uX3N0YXRlIjoiYmU2MzljMTQtMjBkYy00MGQwLWFkOTMtMTYzMWUxN2FjMzZkIiwiYWNyIjoiMSIsInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInNpZCI6ImJlNjM5YzE0LTIwZGMtNDBkMC1hZDkzLTE2MzFlMTdhYzM2ZCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6Im1hcnNoYWxsIGVyaWNzb24iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtYXJzaGFsbDEiLCJnaXZlbl9uYW1lIjoibWFyc2hhbGwiLCJmYW1pbHlfbmFtZSI6ImVyaWNzb24iLCJlbWFpbCI6Im1hcnNoYWxsMUBlcmljc29uLmNvbSJ9.B8GTh2Hi3Ghyfbl1UavGCzUK_IUviK0PbXxUA4kgNB-3xTwHCQdQMToLweM306MlfwdLP4gDUtjJHmxRU-qT9uQtWNGZgl5yn6G3I0Bi-4qvB3sPUTRTOCKvE859J5mZ5QN0dOFvuRtOr18x0MMKv5A79Yy0pVpa4MFHguVl6jL0R9ZbNKFyp2fKJsgub1SVl5v0K1Vyn0J0xoglSFFAd8mQMqKeQqtLbvUSpM7RxC_f4EvNpozjLGG2ljX1F6YZbawgiZ3L_2EV1uQ988_ban48BS1qq9eppSxcd6Ph1s6nvY3NswgzO5ogqLSJQ8tEJLaPkZSRS1b4QEGcT6vvng
