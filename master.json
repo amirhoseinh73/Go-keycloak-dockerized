@@ -1,0 +1,7 @@
+{
+  "realm": "master",
+  "public_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmIJdaG6RYrpI/LGq8KHkQU6Ag3C2aIB/FWxVdM4SS3IYC5KzUuP6uq+BkF9mMr70BqL/eouJSL3jmF6fVUPLYrMJz5TuqSNmkjmEeHqZrQnwJ/EFx5XvR3VLHirkfqn0gCOpWlOcs0ZktDy2xTPSWp3wl/bXnm5VYy3sTR0tldyswNz23VDROis0/sbcM8hS9iNs3xOed/DRiHx8PkrpGFEo6lyAPBDeXQzQgOK71iMJvHYh9PictMbK8x6RKK6O1hpFlYtlnmlSuGwpwe5hJ6yVUbmCzbOf40kmcAsBE/DRDmdr1UoqPSvaFgIFWPL1tR6suAUbmk4V7uvU7L1NUQIDAQAB",
+  "token-service": "http://localhost:8080/auth/realms/master/protocol/openid-connect",
+  "account-service": "http://localhost:8080/auth/realms/master/account",
+  "tokens-not-before": 0
+}
