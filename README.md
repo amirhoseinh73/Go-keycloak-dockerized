@@ -4,9 +4,9 @@
 
 2. Run Go in container &check;
 
-3. call keycloak apis using Go
+3. call keycloak apis using Go &check;
 
-4. create simple application
-  - users can create blogs
+4. create simple application &check;
+    - users can create blogs (in progress)
 
-5. use keycloak oauth2.0 process for user authorization
+5. use keycloak oauth2.0 process for user authorization &check;
